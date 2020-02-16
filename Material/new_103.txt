@@ -1,0 +1,61 @@
+az vm list
+az vm create
+az vm create
+
+az network list
+az network create
+az network create
+
+az network vnet subnet list
+az network vnet subnet create
+az network vnet subnet create
+
+Get-AzVM
+New-AzVM
+Remove-AzVM
+
+Get-AzKeyVault
+New-AzKeyVault
+Remove-AzKeyVault
+
+Get-AzVirtualNetwork
+New-AzVirtualNetwork
+Remove-AzVirtualNetwork
+
+https://docs.microsoft.com/en-us/cli/azure/?view=azure-cli-latest
+
+https://docs.microsoft.com/en-us/powershell/azure/?view=azps-3.4.0&viewFallbackFrom=azps-3.3.0
+
+$PSVersionTable.PSVersion
+Install-Module -Name Az -AllowClobber
+
+Connect-AzAccount
+
+Get-AzSubscription
+
+$contect = Get-AzSubscription -Subscription 1234-223.12.2.322
+
+Set-AzContext $context
+
+---policy
+
+New-AzResourceGroup -Name "rg" -Location "East US"
+
+$rg = Get-AzResourceGroup -Name "rg"
+
+$rg.ResourceId
+$rg.ResourceGroupId
+
+Get-AzPolicyDefinition | Where-Object { $_.Properties.DisplayName -eq "Require specified tag" }
+
+$definition = Get-AzPolicyDefinition | Where-Object { $_.Properties.DisplayName -eq "Require specified tag" }
+
+New-AzPolicyAssignment -Name 'require-tag-policy' -DisplayName 'Require specified tag' -Scope $rg.ResourceId -PolicyDefinition $definition
+
+--Diagnostics
+
+
+
+
+
+https://eylearning.udemy.com/

@@ -1,0 +1,136 @@
+Using ARM
+
+az group deployment create \
+  --name MyDeployment \
+  --resource-group $RESOURCEGROUP \
+  --template-uri "https://raw.githubusercontent.com/Azure/azure-quickstart-templates/master/101-vm-simple-linux/azuredeploy.json" \
+  --parameters adminUsername=$USERNAME \
+  --parameters authenticationType=password \
+  --parameters adminPasswordOrKey=$PASSWORD \
+  --parameters dnsLabelPrefix=$DNS_LABEL_PREFIX
+
+Checking implementation
+
+az group deployment show \
+  --name MyDeployment \
+  --resource-group $RESOURCEGROUP
+
+Checking virtual machines
+
+az vm list \
+  --resource-group $RESOURCEGROUP \
+  --output table
+
+instalar y configurar Nginx en la máquina virtual
+
+az vm extension set \
+  --resource-group $RESOURCEGROUP \
+  --vm-name simpleLinuxVM \
+  --name customScript \
+  --publisher Microsoft.Azure.Extensions \
+  --version 2.0 \
+  --settings '{"fileUris":["https://raw.githubusercontent.com/MicrosoftDocs/mslearn-welcome-to-azure/master/configure-nginx.sh"]}' \
+  --protected-settings '{"commandToExecute": "./configure-nginx.sh"}'
+
+Discos
+
+az configure --defaults location=eastus
+az configure --defaults group="learn-ba780c31-8ddc-4e1a-bf8e-2d99480255a5"
+
+az vm create \
+  --name support-web-vm01 \
+  --image UbuntuLTS \
+  --size Standard_DS1_v2 \
+  --admin-username azureuser \
+  --generate-ssh-keys
+
+az vm disk attach \
+  --vm-name support-web-vm01 \
+  --name uploadDataDisk1 \
+  --size-gb 64 \
+  --sku Premium_LRS \
+  --new
+
+ipaddress=$(az vm show \
+  --name support-web-vm01 \
+  --show-details \
+  --query [publicIps] \
+  --o tsv)
+
+ssh azureuser@$ipaddress lsblk
+
+az vm extension set \
+  --vm-name support-web-vm01 \
+  --name customScript \
+  --publisher Microsoft.Azure.Extensions \
+  --settings '{"fileUris":["https://raw.githubusercontent.com/MicrosoftDocs/mslearn-add-and-size-disks-in-azure-virtual-machines/master/add-data-disk.sh"]}' \
+  --protected-settings '{"commandToExecute": "./add-data-disk.sh"}'
+
+az disk list \
+  --query '[*].{Name:name,Gb:diskSizeGb,Tier:sku.tier}' \
+  --output table
+
+az vm deallocate --name support-web-vm01
+
+az disk update --name uploadDataDisk1 --size-gb 128
+
+az vm start --name support-web-vm01
+
+ipaddress=$(az vm show --name support-web-vm01 -d --query [publicIps] --o tsv)
+
+ssh azureuser@$ipaddress lsblk
+
+az vm extension set \
+  --vm-name support-web-vm01 \
+  --name customScript \
+  --publisher Microsoft.Azure.Extensions \
+  --settings '{"fileUris":["https://raw.githubusercontent.com/MicrosoftDocs/mslearn-add-and-size-disks-in-azure-virtual-machines/master/resize-data-disk.sh"]}' \
+  --protected-settings '{"commandToExecute": "./resize-data-disk.sh"}'
+
+ssh azureuser@$ipaddress df -h
+
+Create a vault
+
+New-AzKeyVault -Location <location> `
+    -ResourceGroupName <resource-group> `
+    -VaultName "myKeyVault" `
+    -EnabledForDiskEncryption
+
+Set-AzKeyVaultAccessPolicy -VaultName <keyvault-name> -ResourceGroupName <resource-group> -EnabledForDiskEncryption
+
+az keyvault create \
+    --name "myKeyVault" \
+    --resource-group <resource-group> \
+    --location <location> \
+    --enabled-for-disk-encryption True
+
+az keyvault update --name <keyvault-name> --resource-group <resource-group> --enabled-for-disk-encryption "true"
+
+Enable encryption in a existing machines
+
+Set-AzVmDiskEncryptionExtension `
+	-ResourceGroupName <resource-group> `
+    -VMName <vm-name> `
+    -VolumeType [All | OS | Data]
+	-DiskEncryptionKeyVaultId <keyVault.ResourceId> `
+	-DiskEncryptionKeyVaultUrl <keyVault.VaultUri> `
+     -SkipVmBackup
+
+az vm encryption enable \
+    --resource-group <resource-group> \
+    --name <vm-name> \
+    --disk-encryption-keyvault <keyvault-name> \
+    --volume-type [all | os | data] \
+    --skipvmbackup
+
+Checking disk status
+
+Get-AzVmDiskEncryptionStatus  -ResourceGroupName <resource-group> -VMName <vm-name>
+
+az vm encryption show --resource-group <resource-group> --name <vm-name>
+
+Decrypting disks
+
+Disable-AzVMDiskEncryption -ResourceGroupName <resource-group> -VMName <vm-name>
+
+az vm encryption disable --resource-group <resource-group> --name <vm-name>

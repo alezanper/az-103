@@ -1,0 +1,95 @@
+az policy definition create
+
+New-AzureRmPolicyDefinition
+
+https://www.microsoft.com/handsonlabs/selfpacedlabs/details/AZ00034
+
+In order to move resources from a resource group to other you need to create a work space
+
+az feature register --namespace Microsoft.Compute --name ManagedResourcesMove
+
+for checking:
+az feature show --namespace Microsoft.Compute --name ManagedResourcesMove
+
+# After registred run the follow command
+az provider register --namespace Microsoft.Compute
+
+# storage accounts
+https://github.com/MicrosoftLearning/AZ-103-MicrosoftAzureAdministrator/blob/master/Instructions/Labs/03%20-%20Implement%20and%20Manage%20Storage%20(az-100-02).md
+
+blob storage stand for...?
+
+https://github.com/MicrosoftLearning/AZ-103-MicrosoftAzureAdministrator/blob/master/Instructions/Labs/03%20-%20Implement%20and%20Manage%20Storage%20(az-100-02).md
+
+There is also one on File Sync here:
+
+https://github.com/MicrosoftLearning/AZ-103-MicrosoftAzureAdministrator/blob/master/Instructions/Labs/12%20-%20Implementing%20File%20Sync%20(az-100-02b).md
+
+Assignment: Follow this tutorial to backup an Azure Windows VM into a Recovery Services Vault.
+
+https://docs.microsoft.com/en-us/azure/virtual-machines/windows/tutorial-backup-vms
+
+
+#creating a vm
+New-AzResourceGroup -Name myrg -Location EastUS
+
+New-AZVM -ResourceGroupName "myrg" -Name "myvm" -Location "EastUS" - VirtualNetworkName "myVnet" - subnetName "default" -securityGroupName "mysg" -PublicIpAddressName "myipaddr" -OpenPorts 80, 443, 3389
+
+Stop-AZVM -ResourceGroupName "myrg" -Name "myvm"
+
+Start-AZVM -ResourceGroupName "myrg" -Name "myvm"
+
+
+https://github.com/MicrosoftLearning/AZ-103-MicrosoftAzureAdministrator/blob/master/Instructions/Labs/02b%20-%20Virtual%20Machines%20and%20Scale%20Sets%20(az-100-03b).md
+
+https://github.com/gottagetgit/ARMDeploy
+
+az vm image list --output table
+
+https://github.com/Azure/azure-quickstart-templates
+
+# Manage VM
+
+play with a second nic
+
+Set-AzureRmVM -Redeploy -ResourceGroupName "myrg" -Name "MyVM"
+
+For some extra practice, check out the hands on labs about Azure Backup.
+
+https://www.microsoft.com/handsonlabs/selfpacedlabs/details/SP-AZ100074
+
+peering
+
+There is a lab available on Github, which requires your own Azure account to use instead of one provided by Microsoft.
+
+https://github.com/MicrosoftLearning/AZ-103-MicrosoftAzureAdministrator/blob/master/Instructions/Labs/05%20-%20VNet%20Peering%20and%20Service%20Chaining%20(az-100-04).md
+
+#DNS Zone
+New-AzureRMResourceGroup -Name dnsgroup -Location canadaeast
+
+New-AzureRmDnsZone -Name theazureguy.ca -ResourceGroupName dnsgroup
+
+New-AzureRmDnsRecordSet -Name -RecordType A -ZoneName theazureguy.ca -ResourceGroupName dnsgroup -Ttl 3600 -DnsRecords (New-AzureRmDnsRecordConfig -IPv4Address "w.x.y.z")
+
+Get-AzureRmDnsRecordSet -ZoneName theazureguy.ca -ResourceGroupName dnsgroup
+
+Set-AzureRmWebApp -Name azsamplewebapp -ResourceGroupName myrg -Hostnames @("www.theazureapp-azurewebsites.ney")
+
+There is a lab available on Github, which requires your own Azure account to use instead of one provided by Microsoft.
+
+https://github.com/MicrosoftLearning/AZ-103-MicrosoftAzureAdministrator/blob/master/Instructions/Labs/04%20-%20Configure%20Azure%20DNS%20(az-100-04b).md
+
+There is a tutorial on Microsoft Docs that steps through creating an NSG that you can follow along with:
+
+https://docs.microsoft.com/en-us/azure/virtual-network/tutorial-filter-network-traffic
+
+There is a lab available on Github, which requires your own Azure account to use instead of one provided by Microsoft.
+
+https://github.com/MicrosoftLearning/AZ-103-MicrosoftAzureAdministrator/blob/master/Instructions/Labs/09%20-%20Implement%20Directory%20Synchronization%20(az-100-05).md
+
+https://github.com/MicrosoftLearning/AZ-103-MicrosoftAzureAdministrator/blob/master/Instructions/Labs/10%20-%20Azure%20AD%20Identity%20Protection%20(az-101-04b).md
+
+https://github.com/MicrosoftLearning/AZ-103-MicrosoftAzureAdministrator/blob/master/Instructions/Labs/10%20-%20Self-Service%20Password%20Reset%20(az-100-05b).md
+
+https://github.com/MicrosoftLearning/AZ-103-MicrosoftAzureAdministrator/blob/master/Instructions/Labs/Optional%20-%20Privileged%20Identity%20Management%20(az-101-04).md
+
