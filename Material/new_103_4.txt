@@ -1,0 +1,74 @@
+Get-Help Get-ChildItem -detailed
+
+# returns modules
+Get-Module
+
+New-AzVm `
+-ResourceGroupName "CrmTestingResourceGroup" `
+-Name "CrmUnitTests" `
+-Image "UbuntuLTS"
+...
+
+# for installing powershell
+Install-Module -Name Az -AllowClobber
+
+#To Login
+Login-AzAccount
+
+Get-AzSubscription
+
+# Create a resource group
+New-AzResourceGroup -name <name> -location <location>
+
+# Checking resource group
+Get-AzResourceGroup
+
+# Remove Resource group
+Remove-AzResourceGroup -Name <name>
+
+## Azure  CLI ##
+az vm restart -g MyResourceGroup -n MyVm
+
+# Checking for commands to use blob
+az find -q blob
+az storage blob --help
+
+# Create a resourcegroup
+az group create --name <name> --location <location>
+
+# List resourcegroups
+az group list
+az group list --output table
+az group list --query "[?name == '<rg name>']"
+
+# For filtering language http://jmespath.org/2
+
+https://docs.microsoft.com/en-us/azure/azure-resource-manager/resource-group-move-resources#services-that-can-be-moved
+https://docs.microsoft.com/en-us/azure/azure-resource-manager/resource-group-move-resources#services-that-cannot-be-moved
+
+# Remove a resource group
+Remove-AzResourceGroup -Name "ContosoRG01"
+
+# Remove a Resource
+Remove-AzResource -ResourceId <resourceId>
+
+# Creating a lock
+New-AzResourceLock -LockName <lockName> -LockLevel CanNotDelete -ResourceGroupName <resourceGroupName>
+
+# Checking locks
+Get-AzResourceLock
+
+# Remove the lock
+Remove-AzResourceLock -LockName <Name> -ResourceGroupName <Resource Group>
+
+https://azure.microsoft.com/en-us/resources/templates/
+https://azure.microsoft.com/resources/templates?azure-portal=true
+https://azure.microsoft.com/resources/templates/101-vm-simple-windows?azure-portal=true
+https://raw.githubusercontent.com/Azure/azure-quickstart-templates/master/101-vm-simple-windows/azuredeploy.json
+
+# Deploy a template using PS
+$templateUri = <location of the template from the previous demonstration>
+New-AzResourceGroupDeployment -Name rg9deployment1 -ResourceGroupName rg9
+-TemplateUri $templateUri
+
+Get-AzVM
