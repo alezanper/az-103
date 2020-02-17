@@ -72,3 +72,50 @@ New-AzResourceGroupDeployment -Name rg9deployment1 -ResourceGroupName rg9
 -TemplateUri $templateUri
 
 Get-AzVM
+
+# Updating VM
+$ResourceGroupName = "ExerciseResources"
+$vm = Get-AzVM -Name MyVM -ResourceGroupName $ResourceGroupName
+$vm.HardwareProfile.vmSize = "Standard_A3"
+Update-AzVM -ResourceGroupName $ResourceGroupName -VM $vm
+
+## Create a VM ##
+
+# create a resource group
+New-AzResourceGroup -Name myResourceGroup -Location EastUS
+# create the virtual machine
+# when prompted, provide a username and password to be used as the logon
+credentials for the VM
+New-AzVm `
+-ResourceGroupName "myResourceGroup" `
+-Name "myVM" `
+-Location "East US" `
+-VirtualNetworkName "myVnet" `
+-SubnetName "mySubnet" `
+-SecurityGroupName "myNetworkSecurityGroup" `
+-PublicIpAddressName "myPublicIpAddress" `
+-OpenPorts 80,3389
+
+Get-AzPublicIpAddress -ResourceGroupName "myResourceGroup" | Select "IpAddress"
+
+mstsc /v:publicIpAddress
+
+Remove-AzResourceGroup -Name myResourceGroup
+
+# Create a storage using ps
+
+Get-AzLocation | select Location
+$location = "westus"
+$resourceGroup = "storage-demo-resource-group"
+New-AzResourceGroup -Name $resourceGroup -Location $location
+New-AzStorageAccount -ResourceGroupName $resourceGroup -Name "storagedemo"
+-Location $location -SkuName Standard_LRS -Kind StorageV2
+
+# Create a storage using CLI
+
+az group create --name storage-resource-group --location westus
+az account list-locations --query "[].{Region:name}" --out table
+az storage account create --name storagedemo --resource-group storage-resource-
+group --location westus --sku Standard_LRS --kind StorageV2
+
+79
