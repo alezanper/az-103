@@ -118,4 +118,4 @@ az account list-locations --query "[].{Region:name}" --out table
 az storage account create --name storagedemo --resource-group storage-resource-
 group --location westus --sku Standard_LRS --kind StorageV2
 
-79
+89

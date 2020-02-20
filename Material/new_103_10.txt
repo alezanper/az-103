@@ -1,0 +1,60 @@
+encrypt  disks
+
+$location = (Get-AzResourceGroup -name [sandbox Resource Group]).location
+
+$vmName = "fmdata-vm01"
+$rgName = "[sandbox Resource Group]"
+
+New-AzVm `
+    -ResourceGroupName $rgName `
+    -Name $vmName `
+    -Location $location `
+    -OpenPorts 3389
+
+$vm = Get-AzVM -Name $vmName -ResourceGroupName $rgName
+
+$vm.StorageProfile.OSDisk
+
+Get-AzVmDiskEncryptionStatus  `
+    -ResourceGroupName $rgName `
+    -VMName $vmName
+
+$keyVaultName = "mvmdsk-kv-1234"
+
+New-AzKeyVault -VaultName $keyVaultName `
+    -Location $location `
+    -ResourceGroupName $rgName `
+    -EnabledForDiskEncryption
+
+$keyVault = Get-AzKeyVault `
+    -VaultName $keyVaultName `
+    -ResourceGroupName $rgName
+
+Set-AzVmDiskEncryptionExtension `
+    -ResourceGroupName $rgName `
+    -VMName $vmName `
+    -VolumeType All `
+    -DiskEncryptionKeyVaultId $keyVault.ResourceId `
+    -DiskEncryptionKeyVaultUrl $keyVault.VaultUri `
+    -SkipVmBackup
+
+Get-AzVmDiskEncryptionStatus  -ResourceGroupName $rgName -VMName $vmName
+
+
+https://azure.microsoft.com/en-us/resources/templates/
+
+# Execute arm templates/
+
+New-AzResourceGroupDeployment `
+    -Name encrypt-disk `
+    -ResourceGroupName <resource-group-name> `
+    -TemplateUri https://raw.githubusercontent.com/azure/azure-quickstart-templates/master/201-encrypt-running-windows-vm-without-aad/azuredeploy.json
+
+o
+
+azure config mode arm
+azure group deployment create <my-resource-group> <my-deployment-name> \ 
+    --template-uri https://raw.githubusercontent.com/azure/azure-quickstart-templates/master/201-encrypt-running-windows-vm-without-aad/azuredeploy.json
+
+# DCS de PowerShell #
+
