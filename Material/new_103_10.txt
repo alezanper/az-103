@@ -58,3 +58,115 @@ azure group deployment create <my-resource-group> <my-deployment-name> \
 
 # DCS de PowerShell #
 
+
+
+
+
+USERNAME=azureuser
+PASSWORD=$(openssl rand -base64 32)
+
+az vm create \
+  --resource-group learn-4d80de44-3e27-43f9-b623-23d552c4dd07 \
+  --name myVM \
+  --image win2016datacenter \
+  --admin-username $USERNAME \
+  --admin-password $PASSWORD
+
+az vm open-port \
+  --port 80 \
+  --resource-group learn-4d80de44-3e27-43f9-b623-23d552c4dd07 \
+  --name myVM
+
+####################
+
+STORAGE=metricsstorage$RANDOM
+
+az storage account create \
+    --name $STORAGE \
+    --sku Standard_LRS \
+    --location eastus2 \
+    --resource-group learn-404c9111-763d-4227-ada0-47ab59ec8710
+
+az vm create \
+    --name monitored-linux-vm \
+    --image UbuntuLTS \
+    --size Standard_B1s \
+    --location eastus2 \
+    --admin-username azureuser \
+    --boot-diagnostics-storage $STORAGE \
+    --resource-group learn-404c9111-763d-4227-ada0-47ab59ec8710 \
+    --generate-ssh-keys
+
+
+az storage account create \
+        --resource-group learn-3a4c54ab-bf13-4e2b-8f5e-c75fa22fb497 \
+        --kind StorageV2 \
+        --sku Standard_LRS \
+        --access-tier Cool \
+        --name mystoragealex
+
+
+## Rest API ##
+GET https://[url-for-service-account]/?comp=list&include=metadata
+
+## Client library ##
+The same for javascript
+
+const containerName = "...";
+const blobService = storage.createBlobService();
+
+blobService.listBlobsSegmented(containerName, null, function (error, results) {
+    if (results) {
+        for (var i = 0, blob; blob = results.entries[i]; i++) {
+            // Work with blob item .. could be page blob, block blob, etc.
+        }
+    }
+});
+
+# add npm package
+npm install azure-storage --save
+
+node index.js
+
+touch .env
+
+code .
+
+AZURE_STORAGE_CONNECTION_STRING = DefaultEndpointsProtocol=https;EndpointSuffix=core.windows.net;AccountName=mystoragealex;AccountKey=REusJNjECAIlB8R0iYTjUe0dXnG5HPuhiiUkBZ5xD0AyOnP8MgOMegqE7aZJ55XKm1Onp62AfZgTftzL1FLdHg==
+
+az storage account show-connection-string \
+    --resource-group learn-3a4c54ab-bf13-4e2b-8f5e-c75fa22fb497 \
+    --query connectionString \
+    --name mystoragealex
+
+npm install dotenv --save
+
+## storage account ##
+
+STORAGEACCT=$(az storage account create \
+        --resource-group learn-914ab75f-46f4-4311-b0c0-c648ddc94cb8 \
+        --name healthcareapp$RANDOM \
+        --sku Standard_RAGRS \
+        --output tsv \
+        --query "name")
+
+echo $STORAGEACCT	healthcareapp11570
+
+# checking replication
+az storage account show \
+        --name $STORAGEACCT \
+        --query "[statusOfPrimary, statusOfSecondary]"
+
+# cheking connection string
+az storage account show-connection-string \
+        --name $STORAGEACCT \
+        --resource-group learn-914ab75f-46f4-4311-b0c0-c648ddc94cb8
+
+DefaultEndpointsProtocol=https;EndpointSuffix=core.windows.net;AccountName=healthcareapp11570;AccountKey=x/G7/1aviFCWuizdS8NhjQnzWNwPZpLC3NXRKIvwmJmsjyyKkcLETP4daOZaR2xAw9uKMfVZuJ6x3+2cPkdFAA==
+
+# replication status
+az storage account show \
+        --name $STORAGEACCT \
+        --expand geoReplicationStats \
+        --query "[primaryEndpoints, secondaryEndpoints, geoReplicationStats]"
+
