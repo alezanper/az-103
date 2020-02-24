@@ -1,1 +1,123 @@
-h
+# creating a vnet
+az network vnet create \
+    --resource-group learn-0612b316-c775-4521-9a97-0ec1f50514d5 \
+    --name Azure-VNet-1 \
+    --address-prefix 10.0.0.0/16 \
+    --subnet-name Services \
+    --subnet-prefix 10.0.0.0/24
+
+# GatewaySubnet 
+az network vnet subnet create \
+    --resource-group learn-0612b316-c775-4521-9a97-0ec1f50514d5 \
+    --vnet-name Azure-VNet-1 \
+    --address-prefix 10.0.255.0/27 \
+    --name GatewaySubnet
+
+# LNG-HQ-Network local network gateway
+az network local-gateway create \
+    --resource-group learn-0612b316-c775-4521-9a97-0ec1f50514d5 \
+    --gateway-ip-address 94.0.252.160 \
+    --name LNG-HQ-Network \
+    --local-address-prefixes 172.16.0.0/16
+
+# simulated on-premise
+az network vnet create \
+    --resource-group learn-0612b316-c775-4521-9a97-0ec1f50514d5 \
+    --name HQ-Network \
+    --address-prefix 172.16.0.0/16 \
+    --subnet-name Applications \
+    --subnet-prefix 172.16.0.0/24
+
+#  add GatewaySubnet to HQ-Network
+az network vnet subnet create \
+    --resource-group learn-0612b316-c775-4521-9a97-0ec1f50514d5 \
+    --address-prefix 172.16.255.0/27 \
+    --name GatewaySubnet \
+    --vnet-name HQ-Network
+
+# LNG-Azure-VNet-1 local network gateway.
+az network local-gateway create \
+    --resource-group learn-0612b316-c775-4521-9a97-0ec1f50514d5 \
+    --gateway-ip-address 94.0.252.160 \
+    --name LNG-Azure-VNet-1 \
+    --local-address-prefixes 10.0.0.0/16
+
+az network vnet list --output table
+
+az network local-gateway list \
+    --resource-group learn-0612b316-c775-4521-9a97-0ec1f50514d5 \
+    --output table
+
+#create the PIP-VNG-Azure-VNet-1 public IP address.
+az network public-ip create \
+    --resource-group learn-0612b316-c775-4521-9a97-0ec1f50514d5 \
+    --name PIP-VNG-Azure-VNet-1 \
+    --allocation-method Dynamic
+
+# create the VNG-Azure-VNet-1 virtual network gateway.
+az network vnet-gateway create \
+    --resource-group learn-0612b316-c775-4521-9a97-0ec1f50514d5 \
+    --name VNG-Azure-VNet-1 \
+    --public-ip-address PIP-VNG-Azure-VNet-1 \
+    --vnet Azure-VNet-1 \
+    --gateway-type Vpn \
+    --vpn-type RouteBased \
+    --sku VpnGw1 \
+    --no-wait
+
+# Create the on-premises VPN gateway
+# create the PIP-VNG-HQ-Network public IP address.
+az network public-ip create \
+    --resource-group learn-0612b316-c775-4521-9a97-0ec1f50514d5 \
+    --name PIP-VNG-HQ-Network \
+    --allocation-method Dynamic
+
+# create the VNG-HQ-Network virtual network gateway.
+az network vnet-gateway create \
+    --resource-group learn-0612b316-c775-4521-9a97-0ec1f50514d5 \
+    --name VNG-HQ-Network \
+    --public-ip-address PIP-VNG-HQ-Network \
+    --vnet HQ-Network \
+    --gateway-type Vpn \
+    --vpn-type RouteBased \
+    --sku VpnGw1 \
+    --no-wait
+
+# allows you to monitor the progress.
+watch -d -n 5 az network vnet-gateway list \
+    --resource-group learn-0612b316-c775-4521-9a97-0ec1f50514d5 \
+    --output table
+
+# to check whether both virtual network gateways have been created:
+az network vnet-gateway list \
+    --resource-group learn-0612b316-c775-4521-9a97-0ec1f50514d5 \
+    --query "[?provisioningState=='Succeeded']" \
+    --output table
+
+# retrieve the IPv4 address assigned to PIP-VNG-Azure-VNet-1.
+PIPVNGAZUREVNET1="$(az network public-ip show \
+    --resource-group learn-0612b316-c775-4521-9a97-0ec1f50514d5 \
+    --name PIP-VNG-Azure-VNet-1 \
+    --query "[ipAddress]" \
+    --output tsv)"
+
+# pdate the LNG-Azure-VNet-1 local network gateway so that it points to the public IP address attached to the VNG-Azure-VNet-1 virtual network gateway
+az network local-gateway update \
+    --resource-group learn-0612b316-c775-4521-9a97-0ec1f50514d5 \
+    --name LNG-Azure-VNet-1 \
+    --gateway-ip-address $PIPVNGAZUREVNET1
+
+# retrieve the IPv4 address assigned to PIP-VNG-HQ-Network.
+PIPVNGHQNETWORK="$(az network public-ip show \
+    --resource-group learn-0612b316-c775-4521-9a97-0ec1f50514d5 \
+    --name PIP-VNG-HQ-Network \
+    --query "[ipAddress]" \
+    --output tsv)"
+
+# update the LNG-HQ-Network local network gateway so that it points to the public IP address attached to the VNG-HQ-Network virtual network gateway
+az network local-gateway update \
+    --resource-group learn-0612b316-c775-4521-9a97-0ec1f50514d5 \
+    --name LNG-HQ-Network \
+    --gateway-ip-address $PIPVNGHQNETWORK
+
+# Create the connections
