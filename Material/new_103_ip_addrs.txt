@@ -1,0 +1,84 @@
+# to create the CoreServicesVnet virtual network:
+az network vnet create \
+    --resource-group learn-4fac1871-72f2-4dee-8e60-c5787774324a \
+    --name CoreServicesVnet \
+    --address-prefix 10.20.0.0/16 \
+    --location westus
+
+# create the subnets
+az network vnet subnet create \
+    --resource-group learn-4fac1871-72f2-4dee-8e60-c5787774324a \
+    --vnet-name CoreServicesVnet \
+    --name GatewaySubnet \
+    --address-prefixes 10.20.0.0/27
+
+az network vnet subnet create \
+    --resource-group learn-4fac1871-72f2-4dee-8e60-c5787774324a \
+    --vnet-name CoreServicesVnet \
+    --name SharedServicesSubnet \
+    --address-prefixes 10.20.10.0/24
+
+az network vnet subnet create \
+    --resource-group learn-4fac1871-72f2-4dee-8e60-c5787774324a \
+    --vnet-name CoreServicesVnet \
+    --name DatabaseSubnet \
+    --address-prefixes 10.20.20.0/24
+
+az network vnet subnet create \
+    --resource-group learn-4fac1871-72f2-4dee-8e60-c5787774324a \
+    --vnet-name CoreServicesVnet \
+    --name PublicWebServiceSubnet \
+    --address-prefixes 10.20.30.0/24
+
+# to show all the subnets that we configured
+az network vnet subnet list \
+    --resource-group learn-4fac1871-72f2-4dee-8e60-c5787774324a \
+    --vnet-name CoreServicesVnet \
+    --output table
+
+# to create the ManufacturingVnet virtual network:
+az network vnet create \
+    --resource-group learn-4fac1871-72f2-4dee-8e60-c5787774324a \
+    --name ManufacturingVnet \
+    --address-prefix 10.30.0.0/16 \
+    --location northeurope
+
+# create the subnets
+az network vnet subnet create \
+    --resource-group learn-4fac1871-72f2-4dee-8e60-c5787774324a \
+    --vnet-name ManufacturingVnet \
+    --name ManufacturingSystemSubnet \
+    --address-prefixes 10.30.10.0/24
+
+az network vnet subnet create \
+    --resource-group learn-4fac1871-72f2-4dee-8e60-c5787774324a \
+    --vnet-name ManufacturingVnet \
+    --name SensorSubnet1 \
+    --address-prefixes 10.30.20.0/24
+
+az network vnet subnet create \
+    --resource-group learn-4fac1871-72f2-4dee-8e60-c5787774324a \
+    --vnet-name ManufacturingVnet \
+    --name SensorSubnet2 \
+    --address-prefixes 10.30.21.0/24
+
+az network vnet subnet create \
+    --resource-group learn-4fac1871-72f2-4dee-8e60-c5787774324a \
+    --vnet-name ManufacturingVnet \
+    --name SensorSubnet3 \
+    --address-prefixes 10.30.22.0/24
+
+# create the ResearchVnet virtual network:
+az network vnet create \
+    --resource-group learn-4fac1871-72f2-4dee-8e60-c5787774324a \
+    --name ResearchVnet \
+    --address-prefix 10.40.40.0/24 \
+    --location westindia
+
+#  create the subnets
+az network vnet subnet create \
+    --resource-group learn-4fac1871-72f2-4dee-8e60-c5787774324a \
+    --vnet-name ResearchVnet \
+    --name ResearchSystemSubnet \
+    --address-prefixes 10.40.40.0/24
+

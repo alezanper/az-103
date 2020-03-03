@@ -1,0 +1,110 @@
+# Powershell
+New-AzVm `
+    -ResourceGroupName "CrmTestingResourceGroup" `
+    -Name "CrmUnitTests" `
+    -Image "UbuntuLTS"
+
+Get-Help Get-ChildItem -detailed
+
+Get-Module
+
+Install-Module -Name Az -AllowClobber
+
+Set-ExecutionPolicy RemoteSigned
+
+Update-Module -Name Az
+
+Import-Module Az
+
+Connect-AzAccount
+
+Select-AzSubscription -Subscription "Visual Studio Enterprise"
+
+Get-AzResourceGroup
+
+Get-AzResourceGroup | Format-Table
+
+New-AzResourceGroup -Name <name> -Location <location>
+
+Get-AzResource
+
+Get-AzResource | ft
+
+Get-AzResource -ResourceGroupName ExerciseResources
+
+New-AzVm 
+       -ResourceGroupName <resource group name> 
+       -Name <machine name> 
+       -Credential <credentials object> 
+       -Location <location> 
+       -Image <image name>
+
+New-AzVM -Name MyVm -ResourceGroupName ExerciseResources -Credential (Get-Credential) ...
+
+$vm = Get-AzVM  -Name MyVM -ResourceGroupName ExerciseResources
+
+$ResourceGroupName = "ExerciseResources"
+$vm = Get-AzVM  -Name MyVM -ResourceGroupName $ResourceGroupName
+$vm.HardwareProfile.vmSize = "Standard_DS3_v2"
+
+Update-AzVM -ResourceGroupName $ResourceGroupName  -VM $vm
+
+
+###################
+
+New-AzVm -ResourceGroupName learn-9a7b1533-1ff2-4afe-b471-1a73c32ce6e5 -Name "testvm-eus-01" -Credential (Get-Credential) -Location "East US" -Image UbuntuLTS -OpenPorts 22
+
+$vm = Get-AzVM -Name "testvm-eus-01" -ResourceGroupName learn-9a7b1533-1ff2-4afe-b471-1a73c32ce6e5
+
+$vm.HardwareProfile
+
+$vm.StorageProfile.OsDisk
+
+$vm | Get-AzPublicIpAddress
+
+ssh bob@205.22.16.5
+
+Stop-AzVM -Name $vm.Name -ResourceGroup $vm.ResourceGroupName
+
+Remove-AzVM -Name $vm.Name -ResourceGroup $vm.ResourceGroupName
+
+Get-AzResource -ResourceGroupName $vm.ResourceGroupName | ft
+
+$vm | Remove-AzNetworkInterface –Force
+
+Get-AzDisk -ResourceGroupName $vm.ResourceGroupName -DiskName $vm.StorageProfile.OSDisk.Name | Remove-AzDisk -Force
+
+Get-AzVirtualNetwork -ResourceGroup $vm.ResourceGroupName | Remove-AzVirtualNetwork -Force
+
+Get-AzNetworkSecurityGroup -ResourceGroup $vm.ResourceGroupName | Remove-AzNetworkSecurityGroup -Force
+
+Get-AzPublicIpAddress -ResourceGroup $vm.ResourceGroupName | Remove-AzPublicIpAddress -Force
+
+
+#### script ##
+
+param([string]$resourceGroup)
+
+$adminCredential = Get-Credential -Message "Enter a username and password for the VM administrator."
+
+For ($i = 1; $i -le 3; $i++)
+{
+    $vmName = "ConferenceDemo" + $i
+    Write-Host "Creating VM: " $vmName
+    New-AzVm -ResourceGroupName $resourceGroup -Name $vmName -Credential $adminCredential -Image UbuntuLTS
+}
+
+# execute
+.\ConferenceDailyReset.ps1 learn-9a7b1533-1ff2-4afe-b471-1a73c32ce6e5
+
+Get-AzResource -ResourceType Microsoft.Compute/virtualMachines
+
+# Move resources #
+
+New-AzResourceGroup -Name <destination resource group name> -Location <location name>
+
+$yourResource = Get-AzResource -ResourceGroupName <resource group name> -ResourceName <resource name>
+
+Move-AzResource -DestinationResourceGroupName <destination resource group name> -ResourceId $yourResource.ResourceId
+
+Get-AzureRmResource -ResourceGroupName <destination resource group name> | ft
